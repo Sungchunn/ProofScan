@@ -2,65 +2,78 @@ import { useState } from 'react';
 
 const styles = {
   container: {
-    padding: '32px 24px',
     fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
     color: '#0f172a',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
   },
   mainContent: {
-    maxWidth: 1200,
-    margin: '0 auto',
+    flex: 1,
+    padding: '40px 24px',
+    overflowY: 'auto',
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+  uploadSection: {
+    maxWidth: 600,
+    margin: '0 auto 40px',
     background: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
-    padding: 32,
+    padding: '40px 32px',
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
   },
+  resultsSection: {
+    maxWidth: 1200,
+    margin: '0 auto',
+  },
   h1: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: 800,
-    margin: 0,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
+    margin: '0 0 12px 0',
+    color: '#fff',
+    textShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+    lineHeight: 1.2,
   },
   sub: {
-    marginTop: 8,
-    color: '#64748b',
-    fontSize: 15,
-    fontWeight: 500,
+    marginTop: 0,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 16,
+    fontWeight: 600,
   },
   formRow: {
     display: 'flex',
-    gap: 12,
-    marginTop: 24,
-    alignItems: 'center',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    gap: 16,
+    marginTop: 0,
+    alignItems: 'stretch',
   },
   input: {
-    padding: '12px 16px',
+    padding: '16px 20px',
     borderRadius: 12,
     border: '2px solid #e2e8f0',
     background: '#fff',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 500,
     transition: 'all 0.2s ease',
     cursor: 'pointer',
-    flex: 1,
-    minWidth: 200,
+    width: '100%',
   },
   btn: {
-    padding: '12px 24px',
+    padding: '16px 32px',
     borderRadius: 12,
     border: 'none',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: '#fff',
     fontWeight: 700,
     cursor: 'pointer',
-    fontSize: 14,
+    fontSize: 16,
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+    width: '100%',
   },
   btnDisabled: {
     opacity: 0.6,
@@ -297,28 +310,34 @@ const OCRDemo = () => {
   return (
     <div style={styles.container}>
       <div style={styles.mainContent}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <h1 style={styles.h1}>ProofScan</h1>
-          <div style={styles.sub}>Image OCR & Spelling Correction</div>
+        {/* Header */}
+        <div style={styles.header}>
+          <h1 style={styles.h1}>Product OCR mis-speilling Scanner</h1>
+          <div style={styles.sub}>Upload images or PDFs to detect and correct spelling errors</div>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.formRow}>
-          <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}
-            onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
-            onMouseOut={(e) => (e.target.style.transform = 'translateY(0)')}
-          >
-            {loading ? '⏳ Processing…' : '🚀 Upload & Analyze'}
-          </button>
-        </form>
+        {/* Upload Section */}
+        <div style={styles.uploadSection}>
+          <form onSubmit={handleSubmit} style={styles.formRow}>
+            <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}
+              onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
+              onMouseOut={(e) => (e.target.style.transform = 'translateY(0)')}
+            >
+              {loading ? '⏳ Processing…' : '🚀 Upload & Analyze'}
+            </button>
+          </form>
 
-      {error && <div style={styles.error}>{error}</div>}
+          {error && <div style={styles.error}>{error}</div>}
+        </div>
 
-      {response && (
-        <div style={styles.grid}>
+        {/* Results Section */}
+        {response && (
+          <div style={styles.resultsSection}>
+            <div style={styles.grid}>
           {/* KPIs */}
           <section style={styles.card}>
             <div style={styles.cardHeader}>
@@ -424,8 +443,9 @@ const OCRDemo = () => {
               <pre style={styles.mono}>{JSON.stringify(response, null, 2)}</pre>
             </div>
           </section>
-        </div>
-      )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
