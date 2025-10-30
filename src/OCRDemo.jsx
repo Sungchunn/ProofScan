@@ -8,19 +8,27 @@ const styles = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mainContent: {
     flex: 1,
+    width: '100%',
+    maxWidth: '100%',
     padding: '40px 24px',
     overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   header: {
     textAlign: 'center',
     marginBottom: 40,
   },
   uploadSection: {
+    width: '100%',
     maxWidth: 700,
-    margin: '0 auto 40px',
+    margin: '0 0 40px 0',
     background: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
     padding: '48px 40px',
@@ -82,8 +90,8 @@ const styles = {
     padding: 4,
   },
   resultsSection: {
+    width: '100%',
     maxWidth: 1200,
-    margin: '0 auto',
   },
   h1: {
     fontSize: 42,
