@@ -7,137 +7,64 @@ const styles = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     minHeight: '100vh',
     width: '100vw',
-    position: 'relative',
+    padding: '32px 24px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'flex-start',
   },
   mainContent: {
     width: '100%',
-    maxWidth: '100%',
-    padding: '40px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    minHeight: '100vh',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  uploadSection: {
-    width: '100%',
-    maxWidth: 700,
-    margin: '0 0 40px 0',
+    maxWidth: 1200,
     background: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
-    padding: '48px 40px',
+    padding: 32,
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-    backdropFilter: 'blur(10px)',
-  },
-  dragDropZone: {
-    border: '3px dashed #cbd5e1',
-    borderRadius: 16,
-    padding: '48px 24px',
-    textAlign: 'center',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-    transition: 'all 0.3s ease',
-    cursor: 'pointer',
-    position: 'relative',
-  },
-  dragDropZoneActive: {
-    border: '3px dashed #667eea',
-    background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
-    transform: 'scale(1.02)',
-  },
-  dragDropIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  dragDropText: {
-    fontSize: 18,
-    fontWeight: 700,
-    color: '#0f172a',
-    marginBottom: 8,
-  },
-  dragDropSubtext: {
-    fontSize: 14,
-    color: '#64748b',
-    marginBottom: 16,
-  },
-  fileInfo: {
-    marginTop: 16,
-    padding: '12px 16px',
-    background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
-    border: '2px solid #86efac',
-    borderRadius: 12,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    justifyContent: 'space-between',
-  },
-  fileName: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#166534',
-  },
-  removeFile: {
-    background: 'none',
-    border: 'none',
-    fontSize: 20,
-    cursor: 'pointer',
-    color: '#dc2626',
-    padding: 4,
-  },
-  resultsSection: {
-    width: '100%',
-    maxWidth: 1200,
   },
   h1: {
-    fontSize: 42,
+    fontSize: 32,
     fontWeight: 800,
-    margin: '0 0 12px 0',
-    color: '#fff',
-    textShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-    lineHeight: 1.2,
+    margin: 0,
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
   },
   sub: {
-    marginTop: 0,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 16,
-    fontWeight: 600,
+    marginTop: 8,
+    color: '#64748b',
+    fontSize: 15,
+    fontWeight: 500,
   },
   formRow: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
-    marginTop: 0,
-    alignItems: 'stretch',
+    gap: 12,
+    marginTop: 24,
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   input: {
-    padding: '16px 20px',
+    padding: '12px 16px',
     borderRadius: 12,
     border: '2px solid #e2e8f0',
     background: '#fff',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 500,
     transition: 'all 0.2s ease',
     cursor: 'pointer',
-    width: '100%',
+    flex: 1,
+    minWidth: 200,
   },
   btn: {
-    padding: '16px 32px',
+    padding: '12px 24px',
     borderRadius: 12,
     border: 'none',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: '#fff',
     fontWeight: 700,
     cursor: 'pointer',
-    fontSize: 16,
+    fontSize: 14,
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-    width: '100%',
   },
   btnDisabled: {
     opacity: 0.6,
@@ -330,66 +257,11 @@ const OCRDemo = () => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   const n8nWebhookURL = 'https://flexscale.app.n8n.cloud/webhook/009f42dc-b706-4eb7-988d-c59cc8ca4e3f';
 
-  const validateFileType = (file) => {
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-    return validTypes.includes(file.type.toLowerCase());
-  };
-
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      if (!validateFileType(selectedFile)) {
-        setError('Invalid file type. Please upload only PNG or JPEG images.');
-        setFile(null);
-        return;
-      }
-      setFile(selectedFile);
-      setResponse(null);
-      setError(null);
-    }
-  };
-
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      if (!validateFileType(droppedFile)) {
-        setError('Invalid file type. Please upload only PNG or JPEG images.');
-        setFile(null);
-        return;
-      }
-      setFile(droppedFile);
-      setResponse(null);
-      setError(null);
-    }
-  };
-
-  const removeFile = () => {
-    setFile(null);
+    setFile(e.target.files[0]);
     setResponse(null);
     setError(null);
   };
@@ -429,86 +301,28 @@ const OCRDemo = () => {
   return (
     <div style={styles.container}>
       <div style={styles.mainContent}>
-        {/* Header */}
-        <div style={styles.header}>
-          <h1 style={styles.h1}>Product OCR Misspelling Scanner</h1>
-          <div style={styles.sub}>Upload PNG or JPEG images to detect and correct spelling errors</div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <h1 style={styles.h1}>ProofScan</h1>
+          <div style={styles.sub}>Image OCR & Spelling Correction</div>
         </div>
 
-        {/* Upload Section */}
-        <div style={styles.uploadSection}>
-          <form onSubmit={handleSubmit}>
-            <div
-              style={{
-                ...styles.dragDropZone,
-                ...(isDragging ? styles.dragDropZoneActive : {}),
-              }}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={() => document.getElementById('fileInput').click()}
-            >
-              <div style={styles.dragDropIcon}>📁</div>
-              <div style={styles.dragDropText}>
-                {file ? file.name : 'Drop your file here'}
-              </div>
-              <div style={styles.dragDropSubtext}>
-                {file ? 'File ready to analyze' : 'or click to browse'}
-              </div>
-              <div style={styles.dragDropSubtext}>
-                Supports: PNG and JPEG images only
-              </div>
-              <input
-                id="fileInput"
-                type="file"
-                accept="image/png,image/jpeg,image/jpg"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </div>
+        <form onSubmit={handleSubmit} style={styles.formRow}>
+          <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}
+            onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
+            onMouseOut={(e) => (e.target.style.transform = 'translateY(0)')}
+          >
+            {loading ? '⏳ Processing…' : '🚀 Upload & Analyze'}
+          </button>
+        </form>
 
-            {file && (
-              <div style={styles.fileInfo}>
-                <div>
-                  <span style={styles.fileName}>✓ {file.name}</span>
-                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-                    {(file.size / 1024).toFixed(2)} KB
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={removeFile}
-                  style={styles.removeFile}
-                  title="Remove file"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
+      {error && <div style={styles.error}>{error}</div>}
 
-            <button
-              type="submit"
-              disabled={loading || !file}
-              style={{
-                ...styles.btn,
-                ...(loading || !file ? styles.btnDisabled : {}),
-                marginTop: 24,
-              }}
-              onMouseOver={(e) => !loading && file && (e.target.style.transform = 'translateY(-2px)')}
-              onMouseOut={(e) => (e.target.style.transform = 'translateY(0)')}
-            >
-              {loading ? '⏳ Analyzing...' : '🚀 Analyze Document'}
-            </button>
-          </form>
-
-          {error && <div style={styles.error}>{error}</div>}
-        </div>
-
-        {/* Results Section */}
-        {response && (
-          <div style={styles.resultsSection}>
-            <div style={styles.grid}>
+      {response && (
+        <div style={styles.grid}>
           {/* KPIs */}
           <section style={styles.card}>
             <div style={styles.cardHeader}>
@@ -614,9 +428,8 @@ const OCRDemo = () => {
               <pre style={styles.mono}>{JSON.stringify(response, null, 2)}</pre>
             </div>
           </section>
-            </div>
-          </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );
