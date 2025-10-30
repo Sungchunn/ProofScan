@@ -19,12 +19,67 @@ const styles = {
     marginBottom: 40,
   },
   uploadSection: {
-    maxWidth: 600,
+    maxWidth: 700,
     margin: '0 auto 40px',
     background: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
-    padding: '40px 32px',
+    padding: '48px 40px',
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    backdropFilter: 'blur(10px)',
+  },
+  dragDropZone: {
+    border: '3px dashed #cbd5e1',
+    borderRadius: 16,
+    padding: '48px 24px',
+    textAlign: 'center',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    position: 'relative',
+  },
+  dragDropZoneActive: {
+    border: '3px dashed #667eea',
+    background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
+    transform: 'scale(1.02)',
+  },
+  dragDropIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  dragDropText: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: '#0f172a',
+    marginBottom: 8,
+  },
+  dragDropSubtext: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 16,
+  },
+  fileInfo: {
+    marginTop: 16,
+    padding: '12px 16px',
+    background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+    border: '2px solid #86efac',
+    borderRadius: 12,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  fileName: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#166534',
+  },
+  removeFile: {
+    background: 'none',
+    border: 'none',
+    fontSize: 20,
+    cursor: 'pointer',
+    color: '#dc2626',
+    padding: 4,
   },
   resultsSection: {
     maxWidth: 1200,
@@ -266,11 +321,51 @@ const OCRDemo = () => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const n8nWebhookURL = 'https://flexscale.app.n8n.cloud/webhook/009f42dc-b706-4eb7-988d-c59cc8ca4e3f';
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setResponse(null);
+      setError(null);
+    }
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile) {
+      setFile(droppedFile);
+      setResponse(null);
+      setError(null);
+    }
+  };
+
+  const removeFile = () => {
+    setFile(null);
     setResponse(null);
     setError(null);
   };
@@ -312,22 +407,74 @@ const OCRDemo = () => {
       <div style={styles.mainContent}>
         {/* Header */}
         <div style={styles.header}>
-          <h1 style={styles.h1}>Product OCR mis-speilling Scanner</h1>
+          <h1 style={styles.h1}>Product OCR Misspelling Scanner</h1>
           <div style={styles.sub}>Upload images or PDFs to detect and correct spelling errors</div>
         </div>
 
         {/* Upload Section */}
         <div style={styles.uploadSection}>
-          <form onSubmit={handleSubmit} style={styles.formRow}>
-            <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
+          <form onSubmit={handleSubmit}>
+            <div
+              style={{
+                ...styles.dragDropZone,
+                ...(isDragging ? styles.dragDropZoneActive : {}),
+              }}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <div style={styles.dragDropIcon}>📁</div>
+              <div style={styles.dragDropText}>
+                {file ? file.name : 'Drop your file here'}
+              </div>
+              <div style={styles.dragDropSubtext}>
+                {file ? 'File ready to analyze' : 'or click to browse'}
+              </div>
+              <div style={styles.dragDropSubtext}>
+                Supports: Images (PNG, JPG) and PDF files
+              </div>
+              <input
+                id="fileInput"
+                type="file"
+                accept="image/*,.pdf"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </div>
+
+            {file && (
+              <div style={styles.fileInfo}>
+                <div>
+                  <span style={styles.fileName}>✓ {file.name}</span>
+                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+                    {(file.size / 1024).toFixed(2)} KB
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  style={styles.removeFile}
+                  title="Remove file"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
-              style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}
-              onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
+              disabled={loading || !file}
+              style={{
+                ...styles.btn,
+                ...(loading || !file ? styles.btnDisabled : {}),
+                marginTop: 24,
+              }}
+              onMouseOver={(e) => !loading && file && (e.target.style.transform = 'translateY(-2px)')}
               onMouseOut={(e) => (e.target.style.transform = 'translateY(0)')}
             >
-              {loading ? '⏳ Processing…' : '🚀 Upload & Analyze'}
+              {loading ? '⏳ Analyzing...' : '🚀 Analyze Document'}
             </button>
           </form>
 
