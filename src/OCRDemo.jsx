@@ -334,9 +334,19 @@ const OCRDemo = () => {
 
   const n8nWebhookURL = 'https://flexscale.app.n8n.cloud/webhook/009f42dc-b706-4eb7-988d-c59cc8ca4e3f';
 
+  const validateFileType = (file) => {
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    return validTypes.includes(file.type.toLowerCase());
+  };
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
+      if (!validateFileType(selectedFile)) {
+        setError('Invalid file type. Please upload only PNG or JPEG images.');
+        setFile(null);
+        return;
+      }
       setFile(selectedFile);
       setResponse(null);
       setError(null);
@@ -367,6 +377,11 @@ const OCRDemo = () => {
 
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
+      if (!validateFileType(droppedFile)) {
+        setError('Invalid file type. Please upload only PNG or JPEG images.');
+        setFile(null);
+        return;
+      }
       setFile(droppedFile);
       setResponse(null);
       setError(null);
@@ -417,7 +432,7 @@ const OCRDemo = () => {
         {/* Header */}
         <div style={styles.header}>
           <h1 style={styles.h1}>Product OCR Misspelling Scanner</h1>
-          <div style={styles.sub}>Upload images or PDFs to detect and correct spelling errors</div>
+          <div style={styles.sub}>Upload PNG or JPEG images to detect and correct spelling errors</div>
         </div>
 
         {/* Upload Section */}
@@ -442,12 +457,12 @@ const OCRDemo = () => {
                 {file ? 'File ready to analyze' : 'or click to browse'}
               </div>
               <div style={styles.dragDropSubtext}>
-                Supports: Images (PNG, JPG) and PDF files
+                Supports: PNG and JPEG images only
               </div>
               <input
                 id="fileInput"
                 type="file"
-                accept="image/*,.pdf"
+                accept="image/png,image/jpeg,image/jpg"
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
