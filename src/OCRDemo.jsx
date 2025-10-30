@@ -145,7 +145,7 @@ const OCRDemo = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const n8nWebhookURL = 'https://flexscale.app.n8n.cloud/webhook-test/009f42dc-b706-4eb7-988d-c59cc8ca4e3f'; // Replace with your n8n webhook URL
+  const n8nWebhookURL = 'https://flexscale.app.n8n.cloud/webhook/009f42dc-b706-4eb7-988d-c59cc8ca4e3f';
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
