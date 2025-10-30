@@ -2,81 +2,150 @@ import { useState } from 'react';
 
 const styles = {
   container: {
-    padding: 24,
+    padding: '32px 24px',
     fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
     color: '#0f172a',
-    background: '#f8fafc',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     minHeight: '100vh',
   },
-  h1: { fontSize: 22, fontWeight: 700, margin: 0, color: '#0f172a' },
-  sub: { marginTop: 6, color: '#475569', fontSize: 14 },
-  formRow: { display: 'flex', gap: 12, marginTop: 16, alignItems: 'center' },
+  mainContent: {
+    maxWidth: 1200,
+    margin: '0 auto',
+    background: 'rgba(255, 255, 255, 0.98)',
+    borderRadius: 24,
+    padding: 32,
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+  },
+  h1: {
+    fontSize: 32,
+    fontWeight: 800,
+    margin: 0,
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+  },
+  sub: {
+    marginTop: 8,
+    color: '#64748b',
+    fontSize: 15,
+    fontWeight: 500,
+  },
+  formRow: {
+    display: 'flex',
+    gap: 12,
+    marginTop: 24,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
   input: {
-    padding: '10px 12px',
-    borderRadius: 8,
-    border: '1px solid #e2e8f0',
+    padding: '12px 16px',
+    borderRadius: 12,
+    border: '2px solid #e2e8f0',
     background: '#fff',
+    fontSize: 14,
+    fontWeight: 500,
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+    flex: 1,
+    minWidth: 200,
   },
   btn: {
-    padding: '10px 14px',
-    borderRadius: 8,
-    border: '1px solid #1e293b',
-    background: '#0f172a',
+    padding: '12px 24px',
+    borderRadius: 12,
+    border: 'none',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: '#fff',
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: 'pointer',
-  },
-  btnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
-  error: {
-    marginTop: 12,
-    color: '#b91c1c',
-    background: '#fee2e2',
-    border: '1px solid #fecaca',
-    borderRadius: 8,
-    padding: '10px 12px',
     fontSize: 14,
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+  },
+  btnDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+    boxShadow: 'none',
+  },
+  error: {
+    marginTop: 16,
+    color: '#dc2626',
+    background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+    border: '2px solid #fca5a5',
+    borderRadius: 12,
+    padding: '14px 18px',
+    fontSize: 14,
+    fontWeight: 600,
+    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.15)',
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gap: 16,
-    marginTop: 20,
+    gap: 24,
+    marginTop: 32,
   },
   card: {
     background: '#fff',
-    border: '1px solid #e2e8f0',
-    borderRadius: 14,
-    boxShadow: '0 1px 2px rgba(2, 6, 23, 0.04)',
+    border: '2px solid #e2e8f0',
+    borderRadius: 18,
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+    overflow: 'hidden',
+    transition: 'all 0.3s ease',
   },
   cardHeader: {
-    padding: '12px 16px',
-    borderBottom: '1px solid #e2e8f0',
+    padding: '16px 20px',
+    borderBottom: '2px solid #f1f5f9',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
   },
-  cardTitle: { fontSize: 16, fontWeight: 700, color: '#0f172a' },
-  cardBody: { padding: 16 },
-  kpis: { display: 'flex', gap: 12, flexWrap: 'wrap' },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 800,
+    color: '#0f172a',
+    letterSpacing: '-0.02em',
+  },
+  cardBody: { padding: 20 },
+  kpis: { display: 'flex', gap: 16, flexWrap: 'wrap' },
   kpi: {
-    background: '#f1f5f9',
-    border: '1px solid #e2e8f0',
-    borderRadius: 10,
-    padding: '10px 12px',
-    minWidth: 140,
+    background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+    border: '2px solid #e0e7ff',
+    borderRadius: 14,
+    padding: '16px 20px',
+    minWidth: 160,
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.1)',
   },
-  kpiLabel: { fontSize: 12, color: '#475569' },
-  kpiValue: { fontSize: 16, fontWeight: 700, marginTop: 2, color: '#0f172a' },
+  kpiLabel: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  },
+  kpiValue: {
+    fontSize: 28,
+    fontWeight: 800,
+    marginTop: 6,
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+  },
   mono: {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
     whiteSpace: 'pre-wrap',
     wordBreak: 'break-word',
-    background: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    borderRadius: 10,
-    padding: 12,
+    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+    border: '2px solid #e2e8f0',
+    borderRadius: 14,
+    padding: 16,
     maxHeight: 300,
     overflowY: 'auto',
+    fontSize: 13,
+    lineHeight: 1.6,
+    boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.05)',
   },
   table: {
     width: '100%',
@@ -86,37 +155,77 @@ const styles = {
   },
   th: {
     textAlign: 'left',
-    padding: '10px 12px',
-    background: '#f8fafc',
-    borderBottom: '1px solid #e2e8f0',
+    padding: '14px 16px',
+    background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
+    borderBottom: '2px solid #e0e7ff',
     position: 'sticky',
     top: 0,
     zIndex: 1,
+    fontWeight: 700,
+    fontSize: 13,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    color: '#475569',
   },
-  td: { padding: '10px 12px', borderBottom: '1px solid #f1f5f9', verticalAlign: 'top' },
+  td: {
+    padding: '14px 16px',
+    borderBottom: '1px solid #f1f5f9',
+    verticalAlign: 'top',
+  },
   badge: (type) => ({
     display: 'inline-block',
-    padding: '2px 8px',
+    padding: '6px 14px',
     borderRadius: 999,
     fontSize: 12,
-    fontWeight: 700,
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
     background:
-      type === 'Spelling' ? '#eef2ff' :
-      type === 'Grammar' ? '#ecfeff' :
-      type === 'Consistency' ? '#fef3c7' : '#f1f5f9',
+      type === 'Spelling' ? 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)' :
+      type === 'Grammar' ? 'linear-gradient(135deg, #ecfeff 0%, #cffafe 100%)' :
+      type === 'Consistency' ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' :
+      'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
     color:
       type === 'Spelling' ? '#3730a3' :
       type === 'Grammar' ? '#155e75' :
       type === 'Consistency' ? '#92400e' : '#334155',
     border:
-      type === 'Spelling' ? '1px solid #e0e7ff' :
-      type === 'Grammar' ? '1px solid #cffafe' :
-      type === 'Consistency' ? '1px solid #fde68a' : '1px solid #e2e8f0',
+      type === 'Spelling' ? '2px solid #c7d2fe' :
+      type === 'Grammar' ? '2px solid #a5f3fc' :
+      type === 'Consistency' ? '2px solid #fcd34d' : '2px solid #cbd5e1',
+    boxShadow:
+      type === 'Spelling' ? '0 2px 8px rgba(99, 102, 241, 0.2)' :
+      type === 'Grammar' ? '0 2px 8px rgba(6, 182, 212, 0.2)' :
+      type === 'Consistency' ? '0 2px 8px rgba(251, 191, 36, 0.2)' :
+      '0 2px 8px rgba(148, 163, 184, 0.15)',
   }),
-  highlightWrong: { background: '#fff1f2', border: '1px dashed #fecdd3', borderRadius: 8, padding: 8 },
-  highlightRight: { background: '#ecfdf5', border: '1px dashed #bbf7d0', borderRadius: 8, padding: 8 },
-  small: { fontSize: 12, color: '#64748b' },
-  footerNote: { marginTop: 10, fontSize: 12, color: '#64748b' },
+  highlightWrong: {
+    background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+    border: '2px dashed #fda4af',
+    borderRadius: 10,
+    padding: 10,
+    fontWeight: 600,
+    boxShadow: '0 2px 8px rgba(244, 63, 94, 0.15)',
+  },
+  highlightRight: {
+    background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+    border: '2px dashed #86efac',
+    borderRadius: 10,
+    padding: 10,
+    fontWeight: 600,
+    boxShadow: '0 2px 8px rgba(34, 197, 94, 0.15)',
+  },
+  small: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: 600,
+  },
+  footerNote: {
+    marginTop: 12,
+    fontSize: 13,
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
 };
 
 function normalizePayload(res) {
@@ -187,17 +296,24 @@ const OCRDemo = () => {
 
   return (
     <div style={styles.container}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <h1 style={styles.h1}>Image OCR & Spelling Correction</h1>
-        <div style={styles.sub}>Clean layout • Readable errors • Copy-friendly</div>
-      </div>
+      <div style={styles.mainContent}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <h1 style={styles.h1}>ProofScan</h1>
+          <div style={styles.sub}>Image OCR & Spelling Correction</div>
+        </div>
 
-      <form onSubmit={handleSubmit} style={styles.formRow}>
-        <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
-        <button type="submit" disabled={loading} style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}>
-          {loading ? 'Processing…' : 'Upload & Analyze'}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} style={styles.formRow}>
+          <input type="file" accept="image/*,.pdf" onChange={handleFileChange} style={styles.input} />
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ ...styles.btn, ...(loading ? styles.btnDisabled : {}) }}
+            onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
+            onMouseOut={(e) => (e.target.style.transform = 'translateY(0)')}
+          >
+            {loading ? '⏳ Processing…' : '🚀 Upload & Analyze'}
+          </button>
+        </form>
 
       {error && <div style={styles.error}>{error}</div>}
 
@@ -310,6 +426,7 @@ const OCRDemo = () => {
           </section>
         </div>
       )}
+      </div>
     </div>
   );
 };
