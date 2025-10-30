@@ -1,0 +1,157 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node: Clean & Normalize OCR Output (embedded in code-fenced JSON)\n\nfunction unwrapCodeFence(s = \"\") {\n  // Extract JSON inside ```json ... ``` or ``` ... ```\n  const fence = s.match(/```(?:json)?\\s*([\\s\\S]*?)```/i);\n  return fence ? fence[1].trim() : s.trim();\n}\n\nfunction safeParse(maybeJson) {\n  try {\n    return typeof maybeJson === \"string\" ? JSON.parse(maybeJson) : maybeJson;\n  } catch (e) {\n    throw new Error(\"Failed to parse embedded JSON: \" + e.message);\n  }\n}\n\nfunction cleanTextArray(arr) {\n  if (!Array.isArray(arr)) return [];\n  // Trim, remove empties, normalize spaces, and dedupe while preserving order\n  const seen = new Set();\n  const out = [];\n  for (const v of arr) {\n    if (typeof v !== \"string\") continue;\n    const t = v.replace(/\\s+/g, \" \").trim();\n    if (!t) continue;\n    if (!seen.has(t)) {\n      seen.add(t);\n      out.push(t);\n    }\n  }\n  return out;\n}\n\nfunction countByType(errors) {\n  const byType = {};\n  for (const e of errors) {\n    const t = (e?.error_type || \"Unknown\").trim();\n    byType[t] = (byType[t] || 0) + 1;\n  }\n  return byType;\n}\n\n// 1) Collect raw text payloads from all incoming items (if multiple)\nconst items = $input.all();\nlet combinedText = \"\";\n\nfor (const item of items) {\n  // Your sample structure: item.json.content.parts[].text\n  const parts = item?.json?.content?.parts;\n  if (Array.isArray(parts)) {\n    for (const p of parts) {\n      if (typeof p?.text === \"string\") combinedText += \"\\n\" + p.text;\n    }\n  } else {\n    // fallback: accept raw json or text in item.json\n    const possible = item?.json?.text || item?.json?.data || item?.json;\n    if (typeof possible === \"string\") combinedText += \"\\n\" + possible;\n  }\n}\n\n// 2) Unwrap code fence and parse JSON\nconst unwrapped = unwrapCodeFence(combinedText);\nconst parsed = safeParse(unwrapped);\n\n// 3) Normalize extracted_text\nconst extracted_text = cleanTextArray(parsed?.extracted_text);\n\n// 4) Keep errors as-is, ensure it's an array\nconst errors_and_corrections = Array.isArray(parsed?.errors_and_corrections)\n  ? parsed.errors_and_corrections\n  : [];\n\n// 5) Totals\nconst totals = {\n  total_text_items: extracted_text.length,\n  total_errors: errors_and_corrections.length,\n  by_type: countByType(errors_and_corrections),\n};\n\n// 6) Pass-through original summary if present\nconst original_summary = parsed?.summary || null;\n\n// 7) Final cleaned output\nreturn [\n  {\n    json: {\n      extracted_text,\n      total_text_items: totals.total_text_items,\n      errors_and_corrections,\n      totals,\n      original_summary,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        -48
+      ],
+      "id": "175709ce-cf44-4259-89ff-ba7fe24653f5",
+      "name": "Extract necessary details"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "009f42dc-b706-4eb7-988d-c59cc8ca4e3f",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -624,
+        -48
+      ],
+      "id": "29f7c818-a872-425c-bbd7-db2119d93e1c",
+      "name": "Webhook",
+      "webhookId": "009f42dc-b706-4eb7-988d-c59cc8ca4e3f"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-preview-05-20",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-preview-05-20"
+        },
+        "text": "=<prompt> \n<instruction>\n    You are a packaging quality control OCR and language analysis expert.\n    Analyze the packaging image, extract all visible text cleanly (no artifacts, no duplicates, no missing items),\n    and detect every spelling, grammar, or consistency error found in that text.\n  </instruction>\n\n  <requirements>\n    - Extract every readable word, phrase, number, unit, and symbol from the image.\n    - Include both large and small text (main labels, fine print, legal text, warnings, etc.).\n    - Remove visual noise such as background patterns or partial letters not forming valid text.\n    - Identify all detected errors, describe them briefly, and give corrected versions.\n    - Output must be a valid JSON object starting with { and ending with }.\n    - No markdown, code blocks, or explanations — JSON only.\n  </requirements>\n\n  <output_format>\n    {\n      \"extracted_text\": [\n        \"List of all clean text fragments and words exactly as seen, in reading order\"\n      ],\n      \"errors_and_corrections\": [\n        {\n          \"error_id\": 1,\n          \"found_text\": \"mispelledWord or sentence\",\n          \"error_type\": \"Spelling | Grammar | Consistency\",\n          \"issue_description\": \"Brief explanation of what's wrong\",\n          \"corrected_text\": \"corrected version\",\n          \"location_hint\": \"front panel / warning / fine print\"\n        }\n      ],\n      \"summary\": {\n        \"total_text_items\": 0,\n        \"total_errors_found\": 0,\n        \"spelling_errors\": 0,\n        \"grammar_errors\": 0,\n        \"consistency_errors\": 0,\n        \"confidence_level\": 0,\n        \"notes\": \"\"\n      }\n    }\n  </output_format>\n\n  <rules>\n    - Always preserve order of extracted text.\n    - Use lowercase/uppercase as it appears on the packaging.\n    - For repeated text (e.g. slogans/logos), include only once if identical.\n    - Use null or empty arrays if nothing found.\n    - Every key must exist in the final JSON.\n  </rules>\n\n  <start>\n    Begin analysis now. Output only valid JSON — no markdown, no extra text.\n  </start>\n</prompt>",
+        "inputType": "binary",
+        "binaryPropertyName": "data0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -48
+      ],
+      "id": "31b8ecb5-f824-4a73-82a3-3d50018a1d07",
+      "name": "Analyze image1",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Me68qbEftTbGLk0z",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst extractedText = input.extracted_text.join(\" \");\nconst errorsAndCorrections = input.errors_and_corrections;\n\nreturn [\n  {\n    json: {\n      extractedText,\n      errorsAndCorrections,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "bc26d056-0f65-4a33-a516-7a83c7a2ee5a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        272,
+        -48
+      ],
+      "id": "f698b15a-4644-4fa9-b129-be34316664cf",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract necessary details": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze image1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Analyze image1": {
+      "main": [
+        [
+          {
+            "node": "Extract necessary details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8e24c8e9-1434-4fa7-a900-9df99eba9adc",
+  "meta": {
+    "instanceId": "3c2e296032c00b52741fdbadd193a1fc62f8e8be2cc8d13e239837b6ef3cd393"
+  },
+  "id": "KYlszjJBlliZLww0",
+  "tags": []
+}
