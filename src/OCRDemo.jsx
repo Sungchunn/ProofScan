@@ -2,19 +2,15 @@ import { useState } from 'react';
 
 const styles = {
   container: {
+    padding: '32px 24px',
     fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
     color: '#0f172a',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     minHeight: '100vh',
-    width: '100vw',
-    padding: '32px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
   },
   mainContent: {
-    width: '100%',
     maxWidth: 1200,
+    margin: '0 auto',
     background: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
     padding: 32,
@@ -233,44 +229,23 @@ const styles = {
 };
 
 function normalizePayload(res) {
-  console.log('Normalizing payload:', res);
+  // Your sample is an array with one object
+  const first = Array.isArray(res) ? res[0] : res || {};
+  const extracted =
+    first.extractedText ||
+    first.extracted_text ||
+    first.content?.extractedText ||
+    '';
+  const errors =
+    first.errorsAndCorrections ||
+    first.errors_and_corrections ||
+    [];
 
-  try {
-    // Handle array responses
-    const first = Array.isArray(res) ? res[0] : res || {};
+  // Convert a long string into a readable block; keep as-is to avoid losing text
+  const extractedBlock =
+    Array.isArray(extracted) ? extracted.join('\n') : String(extracted || '');
 
-    // Try multiple possible field names for extracted text
-    const extracted =
-      first.extractedText ||
-      first.extracted_text ||
-      first.text ||
-      first.content?.extractedText ||
-      first.data?.extractedText ||
-      '';
-
-    // Try multiple possible field names for errors
-    const errors =
-      first.errorsAndCorrections ||
-      first.errors_and_corrections ||
-      first.errors ||
-      first.corrections ||
-      first.data?.errors ||
-      [];
-
-    // Convert to string if needed
-    const extractedBlock =
-      Array.isArray(extracted) ? extracted.join('\n') : String(extracted || '');
-
-    // Ensure errors is an array
-    const errorsList = Array.isArray(errors) ? errors : [];
-
-    console.log('Normalized:', { extractedBlock, errorCount: errorsList.length });
-
-    return { extractedBlock, errors: errorsList };
-  } catch (err) {
-    console.error('Error normalizing payload:', err);
-    return { extractedBlock: '', errors: [] };
-  }
+  return { extractedBlock, errors: Array.isArray(errors) ? errors : [] };
 }
 
 const OCRDemo = () => {
@@ -305,40 +280,12 @@ const OCRDemo = () => {
         body: formData,
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('Server error:', errorText);
-        throw new Error(`Server responded with ${res.status}: ${errorText.substring(0, 100)}`);
-      }
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
 
-      // Try to parse the response as JSON
-      const contentType = res.headers.get('content-type');
-      let data;
-
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          data = await res.json();
-          console.log('Response data:', data);
-        } catch (parseError) {
-          const text = await res.text();
-          console.error('JSON parse error. Raw response:', text);
-          throw new Error('Invalid JSON response from server');
-        }
-      } else {
-        const text = await res.text();
-        console.error('Non-JSON response:', text);
-        throw new Error('Server returned non-JSON response');
-      }
-
-      // Validate response structure
-      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
-        throw new Error('Empty response from server');
-      }
-
+      const data = await res.json();
       setResponse(data);
     } catch (err) {
-      console.error('Upload error:', err);
-      setError('Failed to analyze image: ' + err.message);
+      setError('Failed to fetch results. ' + err.message);
     } finally {
       setLoading(false);
     }
