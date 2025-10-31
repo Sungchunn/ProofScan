@@ -241,11 +241,24 @@ function normalizePayload(res) {
     first.errors_and_corrections ||
     [];
 
+  // Extract image URL or base64 data if present
+  const outputImage =
+    first.outputImage ||
+    first.output_image ||
+    first.image ||
+    first.imageUrl ||
+    first.image_url ||
+    null;
+
   // Convert a long string into a readable block; keep as-is to avoid losing text
   const extractedBlock =
     Array.isArray(extracted) ? extracted.join('\n') : String(extracted || '');
 
-  return { extractedBlock, errors: Array.isArray(errors) ? errors : [] };
+  return {
+    extractedBlock,
+    errors: Array.isArray(errors) ? errors : [],
+    outputImage
+  };
 }
 
 const OCRDemo = () => {
@@ -337,6 +350,28 @@ const OCRDemo = () => {
               </div>
             </div>
           </section>
+
+          {/* Output Image */}
+          {normalized.outputImage && (
+            <section style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div style={styles.cardTitle}>Output Image</div>
+              </div>
+              <div style={styles.cardBody}>
+                <img
+                  src={normalized.outputImage}
+                  alt="Processed output"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: 12,
+                    border: '2px solid #e2e8f0',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+              </div>
+            </section>
+          )}
 
           {/* Extracted Text */}
           <section style={styles.card}>
