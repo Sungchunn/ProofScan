@@ -290,14 +290,41 @@ const OCRDemo = () => {
     try {
       const res = await fetch(n8nWebhookURL, {
         method: 'POST',
+        mode: 'cors',
         body: formData,
       });
 
-      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => 'Unknown error');
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
 
-      const data = await res.json();
+      // Check content type to handle different response formats
+      const contentType = res.headers.get('content-type') || '';
+
+      let data;
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else if (contentType.includes('text')) {
+        const text = await res.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error('Response is not valid JSON');
+        }
+      } else {
+        // Try to parse as JSON anyway
+        const text = await res.text();
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(`Unexpected content type: ${contentType}`);
+        }
+      }
+
       setResponse(data);
     } catch (err) {
+      console.error('Fetch error details:', err);
       setError('Failed to fetch results. ' + err.message);
     } finally {
       setLoading(false);
